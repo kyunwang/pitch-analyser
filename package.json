@@ -2,7 +2,7 @@
 	"name": "pitch-analyser",
 	"version": "0.0.1",
 	"description": "A package that returns information about audio input (e.g. note and frequency)",
-	"main": "build/index.js",
+	"main": "lib/index.js",
 	"scripts": {
 		"build": "babel ./src -d ./lib",
 		"test": "echo \"Error: no test specified\" && exit 1"
@@ -29,5 +29,6 @@
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
 		"babel-preset-env": "^1.7.0"
-	}
+	},
+	"dependencies": {}
 }
