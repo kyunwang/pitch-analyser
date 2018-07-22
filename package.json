@@ -4,7 +4,8 @@
 	"description": "A package that returns information about audio input (e.g. note and frequency)",
 	"main": "lib/index.js",
 	"scripts": {
-		"build": "babel ./src -d ./lib",
+		"build": "npm run lint && babel ./src -d ./lib",
+		"lint": "eslint ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
@@ -28,7 +29,10 @@
 	"homepage": "https://github.com/kyunwang/pitch-analyser#readme",
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
-		"babel-preset-env": "^1.7.0"
+		"babel-preset-env": "^1.7.0",
+		"eslint": "^4.19.1",
+		"eslint-config-airbnb-base": "^13.0.0",
+		"eslint-plugin-import": "^2.13.0"
 	},
 	"dependencies": {}
 }
