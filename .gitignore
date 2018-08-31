@@ -53,3 +53,5 @@ typings/
 
 .idea/
 .vscode/
+
+build
