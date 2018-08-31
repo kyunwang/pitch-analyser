@@ -2,9 +2,9 @@
 	"name": "pitch-analyser",
 	"version": "0.0.1",
 	"description": "A package that returns information about audio input (e.g. note and frequency)",
-	"main": "lib/index.js",
+	"main": "build/index.js",
 	"scripts": {
-		"build": "npm run lint && babel ./src -d ./lib",
+		"build": "babel ./src -d ./build",
 		"lint": "eslint ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
