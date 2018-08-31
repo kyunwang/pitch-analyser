@@ -29,6 +29,7 @@
 	"homepage": "https://github.com/kyunwang/pitch-analyser#readme",
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
+		"babel-plugin-transform-object-rest-spread": "^6.26.0",
 		"babel-preset-env": "^1.7.0",
 		"eslint": "^4.19.1",
 		"eslint-config-airbnb-base": "^13.0.0",
