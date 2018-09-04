@@ -54,4 +54,4 @@ typings/
 .idea/
 .vscode/
 
-build
+dist
