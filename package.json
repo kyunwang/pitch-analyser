@@ -5,7 +5,8 @@
 	"main": "./dist/bundle.js",
 	"scripts": {
 		"prebuild": "rimraf ./dist",
-		"build": "webpack --mode=production --config=./webpack.config.js",
+		"build": "npm run prebruild && webpack --mode=production --config=./webpack.config.js",
+		"prepublish": "npm run build",
 		"lint": "eslint ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -24,6 +25,9 @@
 	],
 	"author": "Kang Yun Wang",
 	"license": "MIT",
+	"files": [
+		"dist"
+	],
 	"bugs": {
 		"url": "https://github.com/kyunwang/pitch-analyser/issues"
 	},
