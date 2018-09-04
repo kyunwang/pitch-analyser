@@ -5,7 +5,7 @@
 	"main": "./dist/bundle.js",
 	"scripts": {
 		"prebuild": "rimraf ./dist",
-		"build": "npm run prebruild && webpack --mode=production --config=./webpack.config.js",
+		"build": "npm run prebuild && webpack --mode=production --config=./webpack.config.js",
 		"prepublish": "npm run build",
 		"lint": "eslint ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
