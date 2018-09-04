@@ -78,7 +78,8 @@ function streamReceived(stream) {
   detectNote();
 }
 
-function PitchAnalyser(args) {
+/* eslint-disable-next-line */
+const PitchAnalyser = function(args) {
   if (!(this instanceof PitchAnalyser)) {
     handleError("constructor needs to be called with the 'new' keyword");
   }
@@ -108,6 +109,6 @@ function PitchAnalyser(args) {
   } else {
     throw new Error('Your browser does not support Audio Context');
   }
-}
+};
 
 module.exports = PitchAnalyser;
