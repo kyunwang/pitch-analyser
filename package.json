@@ -1,6 +1,6 @@
 {
 	"name": "pitch-analyser",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A package that returns information about audio input (e.g. note and frequency)",
 	"main": "./dist/bundle.js",
 	"scripts": {
