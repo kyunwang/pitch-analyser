@@ -2,9 +2,8 @@ import notes from './notes.json';
 import { detectAudioContext, detectGetUserMedia } from './detector';
 import { findFundamentalFrequency, findClosestNote, findCentsOffPitch } from './autoCorrelation';
 
-// Feature detect and pass AudioContext to audioCtx
-const audioCtx = detectAudioContext();
-const getUserMedia = detectGetUserMedia();
+let audioCtx;
+let getUserMedia;
 
 const frequencyTable = notes;
 // A default frequency ot start with
@@ -85,6 +84,10 @@ function streamReceived(stream) {
 
 /* eslint-disable-next-line */
 const PitchAnalyser = function(args) {
+  // Feature detect and pass AudioContext to audioCtx
+  audioCtx = detectAudioContext();
+  getUserMedia = detectGetUserMedia();
+
   if (!(this instanceof PitchAnalyser)) throwError("constructor needs to be called with the 'new' keyword");
 
   // Check whether the browser does support the feature. audioCtx = false or window.AudioContext
