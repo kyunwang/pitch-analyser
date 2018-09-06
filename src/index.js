@@ -24,11 +24,16 @@ let options = {
   callback: null,
   returnNote: true,
   returnCents: false,
+  afterCloseCallback() {},
 };
 
 // Handle error
-function handleError(err) {
+function throwError(err) {
   throw new Error(`Something went wrong: ${err}`);
+}
+
+function logError(err) {
+  console.error(err);
 }
 
 function detectNote() {
@@ -80,35 +85,31 @@ function streamReceived(stream) {
 
 /* eslint-disable-next-line */
 const PitchAnalyser = function(args) {
-  if (!(this instanceof PitchAnalyser)) {
-    handleError("constructor needs to be called with the 'new' keyword");
-  }
-
-  if (args) {
-    options = { ...options, ...args };
-  }
-
-  if (!args.callback) {
-    handleError('A callback needs to be passed');
-  }
-
-  if (options.returnCents && options.returnNote === false) {
-    handleError("'returnNote' should be 'true' to get access to the 'cents");
-  }
+  if (!(this instanceof PitchAnalyser)) throwError("constructor needs to be called with the 'new' keyword");
 
   // Check whether the browser does support the feature. audioCtx = false or window.AudioContext
-  if (audioCtx) {
-    // getUserMedia = window.getUserMedia(went through feature detects) or false
-    if (getUserMedia) {
-      getUserMedia({ audio: true })
-        .then(streamReceived)
-        .catch(handleError);
-    } else {
-      throw new Error('Your brower does not support getUserMedia');
-    }
-  } else {
-    throw new Error('Your browser does not support Audio Context');
-  }
+  if (!audioCtx) logError('Your browser does not support Audio Context');
+
+  // getUserMedia = window.getUserMedia(went through feature detects) or false
+  if (!getUserMedia) logError('Your brower does not support getUserMedia');
+
+  if (!args.callback) throwError('A callback needs to be passed');
+
+  // Pass user given arguments to the options
+  options = { ...options, ...args };
+
+  if (options.returnCents && options.returnNote === false) throwError("'returnNote' should be 'true' to get access to the 'cents");
+
+  // Set the close function
+  this.close = function () {
+    audioCtx.close().then(() => {
+      options.afterCloseCallback();
+    });
+  };
+
+  getUserMedia({ audio: true })
+    .then(streamReceived)
+    .catch(throwError);
 };
 
 module.exports = PitchAnalyser;
