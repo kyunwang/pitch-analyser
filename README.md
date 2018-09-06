@@ -44,6 +44,15 @@ const analyser = new pitchAnalyser({
 });
 ```
 
+3. Stopping the analyser
+   In case you want to stop the analyser. In `componentWillUnmount` in React for example.
+
+```
+componentWillUnmount() {
+	analyser.close();
+}
+```
+
 Thats all you need to do to get started. Check out this example project to see it in action. (**[Repo](https://github.com/kyunwang/note-detector)** / **[Demo](https://kyunwang.github.io/note-detector/)**)
 
 ## Payload format
@@ -63,12 +72,13 @@ The payload is an object and can look like this
 These are the few options available.
 
 -  callback
+-  afterCloseCallback
 -  returnNote
 -  returnCents
 
 ### callback - Required
 
-A function is required as it is the entrypoint of the analyser output.
+This function is required as it is the entrypoint of the analyser output.
 
 ```
 new pitchAnalyser({
@@ -76,6 +86,16 @@ new pitchAnalyser({
 		console.log(value); // E.g. { frequency: 220, note: "A3" }
 	}
 });
+```
+
+### afterCloseCallback
+
+A function which will be called after you close the analyser.
+
+```
+const analyser = new PitchAnalyser({ ... }); // Initializing
+
+analyser.close(); // Closing/stopping the analyser
 ```
 
 ### returnNote
