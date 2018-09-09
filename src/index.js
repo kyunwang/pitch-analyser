@@ -2,6 +2,8 @@ import notes from './notes.json';
 import { detectAudioContext, detectGetUserMedia } from './detector';
 import { findFundamentalFrequency, findClosestNote, findCentsOffPitch } from './autoCorrelation';
 
+import analyseFrequency from './analyseFrequency';
+
 let audioCtx;
 let getUserMedia;
 
@@ -15,6 +17,11 @@ const notesArray = frequencyTable[baseFrequency];
 let audioSource;
 let audioAnalyser;
 let microphoneStream;
+
+let frequencies;
+let frequency;
+let amplitude;
+let volume;
 
 // Default of options
 let options = {
@@ -36,29 +43,48 @@ function logError(err) {
 }
 
 function detectNote() {
-  const buffer = new Uint8Array(audioAnalyser.fftSize);
-  audioAnalyser.getByteTimeDomainData(buffer);
+//   const buffer = new Uint8Array(audioAnalyser.fftSize);
+  //   audioAnalyser.getByteTimeDomainData(buffer);
+  audioAnalyser.getFloatFrequencyData(frequencies);
+  audioAnalyser.getByteTimeDomainData(amplitude);
 
-  const fundamentalFrequency = findFundamentalFrequency(buffer, audioCtx.sampleRate);
+  frequency = analyseFrequency(frequencies);
 
-  if (fundamentalFrequency !== -1) {
-    const returnValue = {};
+  if (frequency) {
+	  const {
+		  returnCents,
+		  callback,
+	  } = options;
 
-    if (options.returnNote) {
-      const { note, frequency } = findClosestNote(fundamentalFrequency, notesArray);
-      returnValue.note = note;
-      returnValue.frequency = frequency;
+    const returnValue = {
+      frequency,
+    };
 
-      // Requires the note to find the cents
-      if (options.returnCents) {
-        const cents = findCentsOffPitch(fundamentalFrequency, frequency);
-        returnValue.cents = cents;
-      }
-    }
+    if (returnCents) {}
 
-    // Execute the callback. (Intended for returning the output)
-    options.callback(returnValue);
+    callback(returnValue);
   }
+
+  //   const fundamentalFrequency = findFundamentalFrequency(buffer, audioCtx.sampleRate);
+
+  //   if (fundamentalFrequency !== -1) {
+  //     const returnValue = {};
+
+  //     if (options.returnNote) {
+  //       const { note, frequency } = findClosestNote(fundamentalFrequency, notesArray);
+  //       returnValue.note = note;
+  //       returnValue.frequency = frequency;
+
+  //       // Requires the note to find the cents
+  //       if (options.returnCents) {
+  //         const cents = findCentsOffPitch(fundamentalFrequency, frequency);
+  //         returnValue.cents = cents;
+  //       }
+  // 	 }
+
+  //     // Execute the callback. (Intended for returning the output)
+  //     options.callback(returnValue);
+  //   }
 
   // Tells the browser we wish to perform a animation. Call callback before repaint
   window.requestAnimationFrame(detectNote);
@@ -71,11 +97,23 @@ function streamReceived(stream) {
 
   // Initialize and assign a audio analyser
   audioAnalyser = audioCtx.createAnalyser();
-  audioAnalyser.fftSize = 2048;
+  //   audioAnalyser.fftSize = 2048;
+
+  // Create frequencies arrayholder
+  frequencies = new Float32Array(audioAnalyser.frequencyBinCount);
+
+
+  amplitude = new Uint8Array(audioAnalyser.frequencyBinCount);
+
+  // Create amplifier
+  volume = audioCtx.createGain();
 
   // Assign a stream source as main source
   audioSource = audioCtx.createMediaStreamSource(microphoneStream);
-  // Connect the analyser to our audio stream
+
+  // Connect the audio to the amplifier
+  audioSource.connect(volume);
+  // Connect the audio to our analyser
   audioSource.connect(audioAnalyser);
 
   // Start note detection
@@ -103,16 +141,21 @@ const PitchAnalyser = function(args) {
 
   if (options.returnCents && options.returnNote === false) throwError("'returnNote' should be 'true' to get access to the 'cents");
 
+  // Start media stream
+  getUserMedia({ audio: true })
+    .then(streamReceived)
+    .catch(throwError);
+
+
+  /*= =========================
+  ===Class methods
+  =========================== */
   // Set the close function
   this.close = function () {
     audioCtx.close().then(() => {
       options.afterCloseCallback();
     });
   };
-
-  getUserMedia({ audio: true })
-    .then(streamReceived)
-    .catch(throwError);
 };
 
 module.exports = PitchAnalyser;
