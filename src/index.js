@@ -1,6 +1,8 @@
 import { detectAudioContext, detectGetUserMedia } from './detector';
 
-import analyseFrequency from './analyseFrequency';
+import {
+	calculateFrequency, calculateNote, throwError, logError,
+} from './helpers';
 
 let audioCtx;
 let getUserMedia;
@@ -11,7 +13,6 @@ let audioAnalyser;
 let audioStream;
 
 let frequencies;
-let frequency;
 let amplitude;
 let volume;
 
@@ -25,26 +26,18 @@ let options = {
 	afterCloseCallback() {},
 };
 
-// Handle error
-function throwError(err) {
-	throw new Error(`Something went wrong: ${err}`);
-}
-
-function logError(err) {
-	console.error(err);
-}
-
-function detectNote() {
+function analysePitch() {
 //   const buffer = new Uint8Array(audioAnalyser.fftSize);
 	//   audioAnalyser.getByteTimeDomainData(buffer);
 	audioAnalyser.getFloatFrequencyData(frequencies);
 	audioAnalyser.getByteTimeDomainData(amplitude);
 
-	frequency = analyseFrequency(frequencies);
+	const frequency = calculateFrequency(frequencies);
 
 	if (frequency) {
 		const {
 			returnCents,
+			returnNote,
 			callback,
 		} = options;
 
@@ -52,16 +45,19 @@ function detectNote() {
 			frequency,
 		};
 
+		if (returnNote) {
+			const note = calculateNote(frequency);
+			returnValue.note = note;
+		}
+
 		if (returnCents) {}
 
-		callback(returnValue);
-
 		// Execute the callback. (Intended for returning the output)
-		options.callback(returnValue);
+		callback(returnValue);
 	}
 
 	// Tells the browser we wish to perform a animation. Call callback before repaint
-	window.requestAnimationFrame(detectNote);
+	window.requestAnimationFrame(analysePitch);
 }
 
 // Call when the stream has connected
@@ -90,7 +86,7 @@ function streamReceived(stream) {
 	audioSource.connect(audioAnalyser);
 
 	// Start note detection
-	detectNote();
+	analysePitch();
 }
 
 const PitchAnalyser = function (args) {
