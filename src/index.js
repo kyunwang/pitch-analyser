@@ -28,7 +28,7 @@ let options = {
 	callback: null,
 	returnNote: true,
 	returnCents: false,
-	decimals: 0,
+	decimals: null,
 	afterCloseCallback() {},
 };
 
@@ -66,7 +66,7 @@ const PitchAnalyser = function (args) {
 			} = options;
 
 			const returnValue = {
-				frequency: decimals ? toDecimals(frequency, decimals) : frequency,
+				frequency: toDecimals(frequency, decimals),
 			};
 
 			if (returnNote) {
@@ -77,7 +77,7 @@ const PitchAnalyser = function (args) {
 			if (returnCents) {
 				if (this.lastFrequency) {
 					const cents = calculateCents(frequency, this.lastFrequency);
-					returnValue.cents = decimals ? toDecimals(cents, decimals) : cents;
+					returnValue.cents = toDecimals(cents, decimals);
 				}
 				this.lastFrequency = frequency;
 			}

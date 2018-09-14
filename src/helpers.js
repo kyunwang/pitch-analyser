@@ -55,6 +55,7 @@ function calculateNote(frequency) {
 }
 
 function toDecimals(number, decimals) {
+	if (typeof decimals !== 'number') return number;
 	const fixedNumber = number.toFixed(decimals);
 	return fixedNumber;
 }
