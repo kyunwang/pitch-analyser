@@ -4,6 +4,7 @@ import {
 	calculateFrequency,
 	calculateNote,
 	calculateCents,
+	toDecimals,
 	throwError,
 	logError,
 } from './helpers';
@@ -27,6 +28,7 @@ let options = {
 	callback: null,
 	returnNote: true,
 	returnCents: false,
+	decimals: 0,
 	afterCloseCallback() {},
 };
 
@@ -44,6 +46,7 @@ const PitchAnalyser = function (args) {
 	this.close = () => {
 		audioCtx.close().then(() => {
 			options.afterCloseCallback();
+			window.cancelAnimationFrame();
 		});
 	};
 
@@ -58,11 +61,12 @@ const PitchAnalyser = function (args) {
 			const {
 				returnCents,
 				returnNote,
+				decimals,
 				callback,
 			} = options;
 
 			const returnValue = {
-				frequency,
+				frequency: decimals ? toDecimals(frequency, decimals) : frequency,
 			};
 
 			if (returnNote) {
@@ -73,7 +77,7 @@ const PitchAnalyser = function (args) {
 			if (returnCents) {
 				if (this.lastFrequency) {
 					const cents = calculateCents(frequency, this.lastFrequency);
-					returnValue.cents = cents;
+					returnValue.cents = decimals ? toDecimals(cents, decimals) : cents;
 				}
 				this.lastFrequency = frequency;
 			}

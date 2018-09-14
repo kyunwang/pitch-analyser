@@ -54,6 +54,11 @@ function calculateNote(frequency) {
 	return note;
 }
 
+function toDecimals(number, decimals) {
+	const fixedNumber = number.toFixed(decimals);
+	return fixedNumber;
+}
+
 // Handle error
 function throwError(err) {
 	throw new Error(`Something went wrong: ${err}`);
@@ -68,6 +73,7 @@ module.exports = {
 	calculateSemiTone,
 	calculateCents,
 	calculateNote,
+	toDecimals,
 	throwError,
 	logError,
 };
