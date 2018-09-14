@@ -4,8 +4,6 @@ const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const A4 = 440;
 const C0 = Math.round(A4 * Math.pow(2, -4.75)); // 16
 
-const baseOctave = 4;
-
 // Code by fritzvd (signaltohertz) - https://github.com/fritzvd/signaltohertz
 // Changes: function name
 function calculateFrequency(frequencies, options) {
@@ -43,8 +41,9 @@ function calculateOctave(semiTonesAway) {
 	return octave;
 }
 
-function calculateCents() {
-
+function calculateCents(currentFrequency, lastFrequency) {
+	const cents = 1200 * Math.log2(lastFrequency / currentFrequency);
+	return cents;
 }
 
 function calculateNote(frequency) {
