@@ -1,4 +1,5 @@
 # Pitch Analyser
+*Documentation has yet to be updated*
 
 A super simple package for reading audio input from a microphone. E.g. pitch frequency, music notes and the cents.
 
