@@ -1,12 +1,16 @@
 {
 	"name": "pitch-analyser",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "A package that returns information about audio input (e.g. note and frequency)",
 	"main": "./dist/bundle.js",
 	"scripts": {
+		"start": "webpack --mode=development --watch --config=./webpack.config.js",
+		"watch": "webpack --mode=development --watch --config=./webpack.config.js",
 		"prebuild": "rimraf ./dist",
 		"build": "npm run prebuild && webpack --mode=production --config=./webpack.config.js",
 		"prepublish": "npm run build",
+		"version": "npm run build",
+		"postversion": "git push && git push --tags",
 		"lint": "eslint ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
