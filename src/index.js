@@ -29,29 +29,55 @@ let options = {
 	returnNote: true,
 	returnCents: false,
 	decimals: null,
-	afterCloseCallback() {},
+	// afterCloseCallback() {},
 };
 
+class PitchAnalyser {
+	constructor(args) {
+		this.args = args;
+		this.lastFrequency = null;
 
-const PitchAnalyser = function (args) {
-	/*= =========================
-	=== Class values
-	=========================== */
-	this.lastFrequency = null;
 
-	/*= =========================
-  === Class methods
-  =========================== */
-	// Set the close function
-	this.close = () => {
-		audioCtx.close().then(() => {
-			options.afterCloseCallback();
-			window.cancelAnimationFrame();
-		});
-	};
+		// Bindings
+		this.initialize = this.initialize.bind(this);
+		this.analysePitch = this.analysePitch.bind(this);
+		this.streamReceived = this.streamReceived.bind(this);
+
+		// Call initilize
+		this.initialize();
+	}
+
+	closeContext(callback) {
+		audioCtx.close().then(() => callback());
+	}
+
+	initialize() {
+		// Feature detect and pass AudioContext to audioCtx
+		audioCtx = detectAudioContext();
+		getUserMedia = detectGetUserMedia();
+
+		if (!(this instanceof PitchAnalyser)) throwError("constructor needs to be called with the 'new' keyword");
+
+		// A callback needs to be passed during the development stage
+		if (!this.args.callback) throwError('A callback needs to be passed');
+
+		// Check whether the browser does support the feature. audioCtx = false or window.AudioContext
+		if (!audioCtx) logError('Your browser does not support Audio Context');
+
+		// getUserMedia = window.getUserMedia(went through feature detects) or false
+		if (!getUserMedia) logError('Your brower does not support getUserMedia');
+
+		// Pass user given arguments to the options
+		options = { ...options, ...this.args };
+
+		// Start media stream
+		getUserMedia({ audio: true })
+			.then(this.streamReceived)
+			.catch(throwError);
+	}
 
 	// Get the frequencies and return values based on options
-	this.analysePitch = () => {
+	analysePitch() {
 		audioAnalyser.getFloatFrequencyData(frequencies);
 		audioAnalyser.getByteTimeDomainData(amplitude);
 
@@ -88,9 +114,9 @@ const PitchAnalyser = function (args) {
 
 		// Tells the browser we wish to perform a animation. Call callback before repaint
 		window.requestAnimationFrame(this.analysePitch);
-	};
+	}
 
-	this.streamReceived = (stream) => {
+	streamReceived(stream) {
 		// Set the stream to audioStream
 		audioStream = stream;
 
@@ -116,34 +142,7 @@ const PitchAnalyser = function (args) {
 
 		// Start note detection
 		this.analysePitch();
-	};
-
-	/*= =========================
-	=== Initialization steps
-	=========================== */
-
-	// Feature detect and pass AudioContext to audioCtx
-	audioCtx = detectAudioContext();
-	getUserMedia = detectGetUserMedia();
-
-	if (!(this instanceof PitchAnalyser)) throwError("constructor needs to be called with the 'new' keyword");
-
-	// A callback needs to be passed during the development stage
-	if (!args.callback) throwError('A callback needs to be passed');
-
-	// Check whether the browser does support the feature. audioCtx = false or window.AudioContext
-	if (!audioCtx) logError('Your browser does not support Audio Context');
-
-	// getUserMedia = window.getUserMedia(went through feature detects) or false
-	if (!getUserMedia) logError('Your brower does not support getUserMedia');
-
-	// Pass user given arguments to the options
-	options = { ...options, ...args };
-
-	// Start media stream
-	getUserMedia({ audio: true })
-		.then(this.streamReceived)
-		.catch(throwError);
-};
+	}
+}
 
 module.exports = PitchAnalyser;
