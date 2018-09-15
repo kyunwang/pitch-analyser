@@ -9,6 +9,8 @@
 		"prebuild": "rimraf ./dist",
 		"build": "npm run prebuild && webpack --mode=production --config=./webpack.config.js",
 		"prepublish": "npm run build",
+		"version": "npm run build",
+		"postversion": "git push && git push --tags",
 		"lint": "eslint ./src",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
