@@ -6,7 +6,7 @@ const C0 = Math.round(A4 * Math.pow(2, -4.75)); // 16
 
 // Code by fritzvd (signaltohertz) - https://github.com/fritzvd/signaltohertz
 // Changes: function name
-function calculateFrequency(frequencies, options) {
+const calculateFrequency = (frequencies, options) => {
 	let rate = 22050 / 1024; // defaults in audioContext.
 
 	if (options) {
@@ -27,47 +27,47 @@ function calculateFrequency(frequencies, options) {
 	  }
 	}
 	return maxI * rate;
-}
+};
 
 // Calculate amount of steps away from C0
-function calculateSemiTone(frequency) {
+const calculateSemiTone = (frequency) => {
 	const semiTonesAway = 12 * Math.log2(frequency / C0);
 	return semiTonesAway;
-}
+};
 
 // Uses C0 as base
-function calculateOctave(semiTonesAway) {
+const calculateOctave = (semiTonesAway) => {
 	const octave = Math.floor(semiTonesAway / 12);
 	return octave;
-}
+};
 
-function calculateCents(currentFrequency, lastFrequency) {
+const calculateCents = (currentFrequency, lastFrequency) => {
 	const cents = 1200 * Math.log2(lastFrequency / currentFrequency);
 	return cents;
-}
+};
 
-function calculateNote(frequency) {
+const calculateNote = (frequency) => {
 	const semiTone = calculateSemiTone(frequency);
 	const octave = calculateOctave(semiTone);
 	const notePosition = Math.floor(semiTone % 12);
 	const note = notes[notePosition] + String(octave);
 	return note;
-}
+};
 
-function toDecimals(number, decimals) {
+const toDecimals = (number, decimals) => {
 	if (typeof decimals !== 'number') return number;
 	const fixedNumber = number.toFixed(decimals);
 	return fixedNumber;
-}
+};
 
 // Handle error
-function throwError(err) {
+const throwError = (err) => {
 	throw new Error(`Something went wrong: ${err}`);
-}
+};
 
-function logError(err) {
+const logError = (err) => {
 	console.error(err);
-}
+};
 
 module.exports = {
 	calculateFrequency,
