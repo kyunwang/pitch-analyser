@@ -9,6 +9,10 @@ import {
 	logError,
 } from './helpers';
 
+import {
+	getInputDevices,
+} from './pitchHelpers.js';
+
 let audioCtx;
 let getUserMedia;
 
@@ -48,7 +52,8 @@ class PitchAnalyser {
 	}
 
 	closeContext(callback) {
-		audioCtx.close().then(() => callback());
+		audioCtx.close()
+			.then(() => callback());
 	}
 
 	initialize() {
@@ -145,4 +150,6 @@ class PitchAnalyser {
 	}
 }
 
+// Using node export for moduble bundling
 module.exports = PitchAnalyser;
+module.exports.getInputDevices = getInputDevices;
