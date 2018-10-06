@@ -33,30 +33,54 @@ let options = {
 	returnNote: true,
 	returnCents: false,
 	decimals: null,
-	// afterCloseCallback() {},
 };
 
 class PitchAnalyser {
 	constructor(args) {
 		this.args = args;
 		this.lastFrequency = null;
+		this.stream;
+		this.audioSource = true;
 
 
 		// Bindings
 		this.initialize = this.initialize.bind(this);
 		this.analysePitch = this.analysePitch.bind(this);
 		this.streamReceived = this.streamReceived.bind(this);
+		this.changeInputDevice = this.changeInputDevice.bind(this);
 
 		// Call initilize
 		this.initialize();
 	}
 
 	closeContext(callback) {
+		if (!callback) return;
 		audioCtx.close()
 			.then(() => callback());
 	}
 
+	changeInputDevice(deviceId) {
+		this.audioSource = deviceId
+			? { deviceId: {
+				 exact: deviceId
+			}}
+			: true;
+
+		// Close the current context
+		this.closeContext();
+		// Reinit with new input device
+		this.initialize();
+	}
+
 	initialize() {
+		// Stop all tracks if any are open
+		if (this.stream) {
+			this.stream.getTracks()
+			.forEach(track => {
+				track.stop();
+			});
+		}
+
 		// Feature detect and pass AudioContext to audioCtx
 		audioCtx = detectAudioContext();
 		getUserMedia = detectGetUserMedia();
@@ -76,7 +100,7 @@ class PitchAnalyser {
 		options = { ...options, ...this.args };
 
 		// Start media stream
-		getUserMedia({ audio: true })
+		getUserMedia({ audio: this.audioSource })
 			.then(this.streamReceived)
 			.catch(throwError);
 	}
@@ -122,6 +146,9 @@ class PitchAnalyser {
 	}
 
 	streamReceived(stream) {
+		// Assign the stream to access if needed
+		this.stream = stream;
+
 		// Set the stream to audioStream
 		audioStream = stream;
 
