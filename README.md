@@ -17,7 +17,7 @@ Here is an example project called note detector using this package here. (**[Rep
 -  [Installing](#installing)
 -  [Usage](#usage) - [Payload format](#payload-format)
 -  [Options](#options)
--  [Methods](#methods)
+-  [Methods/Properties](#methods/properties)
 -  [License](#license)
 
 # Installing
@@ -129,13 +129,21 @@ new pitchAnalyser({
 });
 ```
 
-# Methods
+# Methods/Properties
 
-The methods available for use.
+The methods and properties available for use.
 _You will need to have access to the initializes analyser_
+
+**Methods**
 
 -  resume
 -  closeContext
+
+**Properties**
+
+-  audioContext
+
+## Methods
 
 ### resume
 
@@ -155,6 +163,17 @@ When you want fully stop the analyser (will remove the instance);
 
 ```
 analyser.closeContext(callback);
+```
+
+## Properties
+
+### audioContext
+
+The native audioContext can be accessed here for if you are ambitious and need customization.
+_Check the MDN docs or somewhere else for all the information about the usage of AudioContext_
+
+```
+analyser.audioContext
 ```
 
 # License
