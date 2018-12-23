@@ -9,7 +9,6 @@ import {
 	logError,
 } from './helpers';
 
-let audioCtx;
 let getUserMedia;
 
 // Predefine variables
@@ -28,7 +27,7 @@ let options = {
 	callback: null,
 	returnNote: true,
 	returnCents: false,
-	decimals: null,
+	decimals: 2,
 	// afterCloseCallback() {},
 };
 
@@ -36,10 +35,10 @@ class PitchAnalyser {
 	constructor(args) {
 		this.args = args;
 		this.lastFrequency = null;
-
+		this.audioContext = null;
 
 		// Bindings
-		this.initialize = this.initialize.bind(this);
+		// this.initialize = this.initialize.bind(this);
 		this.analysePitch = this.analysePitch.bind(this);
 		this.streamReceived = this.streamReceived.bind(this);
 
@@ -48,21 +47,27 @@ class PitchAnalyser {
 	}
 
 	closeContext(callback) {
-		audioCtx.close().then(() => callback());
+		if (callback) {
+			this.audioContext.close().then(() => callback());
+		}
 	}
 
 	initialize() {
-		// Feature detect and pass AudioContext to audioCtx
-		audioCtx = detectAudioContext();
+		// Feature detect and pass AudioContext to audioContext
+		this.audioContext = detectAudioContext();
 		getUserMedia = detectGetUserMedia();
 
-		if (!(this instanceof PitchAnalyser)) throwError("constructor needs to be called with the 'new' keyword");
+		if (!(this instanceof PitchAnalyser)) {
+			throwError("constructor needs to be called with the 'new' keyword");
+		}
 
 		// A callback needs to be passed during the development stage
 		if (!this.args.callback) throwError('A callback needs to be passed');
 
-		// Check whether the browser does support the feature. audioCtx = false or window.AudioContext
-		if (!audioCtx) logError('Your browser does not support Audio Context');
+		// Check whether the browser does support the feature. audioContext = false or window.AudioContext
+		if (!this.audioContext) {
+			logError('Your browser does not support Audio Context');
+		}
 
 		// getUserMedia = window.getUserMedia(went through feature detects) or false
 		if (!getUserMedia) logError('Your brower does not support getUserMedia');
@@ -84,12 +89,7 @@ class PitchAnalyser {
 		const frequency = calculateFrequency(frequencies);
 
 		if (frequency) {
-			const {
-				returnCents,
-				returnNote,
-				decimals,
-				callback,
-			} = options;
+			const { returnCents, returnNote, decimals, callback } = options;
 
 			const returnValue = {
 				frequency: toDecimals(frequency, decimals),
@@ -100,7 +100,7 @@ class PitchAnalyser {
 				returnValue.note = note;
 			}
 
-			if (returnCents) {
+			if (returnNote && returnCents) {
 				if (this.lastFrequency) {
 					const cents = calculateCents(frequency, this.lastFrequency);
 					returnValue.cents = toDecimals(cents, decimals);
@@ -121,7 +121,7 @@ class PitchAnalyser {
 		audioStream = stream;
 
 		// Initialize and assign a audio analyser
-		audioAnalyser = audioCtx.createAnalyser();
+		audioAnalyser = this.audioContext.createAnalyser();
 
 		// Create frequencies arrayholder
 		frequencies = new Float32Array(audioAnalyser.frequencyBinCount);
@@ -130,13 +130,14 @@ class PitchAnalyser {
 		amplitude = new Uint8Array(audioAnalyser.frequencyBinCount);
 
 		// Create amplifier
-		volume = audioCtx.createGain();
+		volume = this.audioContext.createGain();
 
 		// Assign a stream source as main source
-		audioSource = audioCtx.createMediaStreamSource(audioStream);
+		audioSource = this.audioContext.createMediaStreamSource(audioStream);
 
 		// Connect the audio to the amplifier
 		audioSource.connect(volume);
+
 		// Connect the audio to our analyser
 		audioSource.connect(audioAnalyser);
 
