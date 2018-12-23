@@ -5,7 +5,7 @@ A super simple package for reading audio input from a microphone. E.g. pitch fre
 This package makes use of the `Web Audio API`
 
 <p align="center">
-	<img src="https://github.com/kyunwang/Repo-Images/blob/master/pitch-analyser/note-detector%20example.png" alt="Demo image" width="300" height="300"/>
+	<img src="https://github.com/kyunwang/Repo-Images/blob/master/pitch-analyser/note-detector%20example.png" alt="Demo image" width="300" height="520"/>
 </p>
 
 Here is an example project called note detector using this package here. (**[Repo](https://github.com/kyunwang/note-detector)** / **[Demo](https://kyunwang.github.io/note-detector/)**)
