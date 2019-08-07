@@ -10,170 +10,114 @@ import {
 	logError,
 } from '../helpers';
 
-function fileAnalyse(audioFile) {
-	let frequencies;
-	console.log(0, audioFile);
+let options = {
+	audioFile: null,
+	callback: null,
+	decimals: 2,
+	entryPerSec: 1, // can be decimals - limit to max .1?
+	onError: null,
+	returnCents: false,
+	returnNote: true,
+	timeAveraging: 0.8,
+};
 
-	if (!audioFile) return new Error('No audiofile provided');
+const audioDataArray = [];
+const FFTSize = 2048;
+const sampleRate = 44100;
 
+let audioContext;
+let offlineCtx;
+let bufferSource;
+let analyser;
+let processor;
+let lastFrequency;
 
-	console.log(1);
-	const audio = new Audio(audioFile);
+function processAudio({ playbackTime }) {
+	const {
+		decimals, entryPerSec, returnCents, returnNote,
+	} = options;
+	const frequencyData = new Float32Array(analyser.frequencyBinCount);
 
+	analyser.getFloatFrequencyData(frequencyData); // Update frequencyData
 
-	const context = detectAudioContext();
+	// Format time based on requested entryPerSec
+	const timestamp = toDecimals((Math.round(playbackTime / entryPerSec) * entryPerSec), 1);
+	const totalEntries = audioDataArray.length;
 
-	// const analyser = context.createAnalyser();
+	if ((timestamp / entryPerSec) > totalEntries) {
+		const frequency = calculateFrequency(frequencyData);
 
-	// const source = context.createMediaElementSource(audio);
+		const returnValue = {
+			timestamp,
+			frequency: toDecimals(frequency, decimals),
+		};
 
-	// source.connect(analyser);
-	// analyser.connect(context.destination);
+		if (frequency) {
+			if (returnNote) {
+				const note = calculateNote(frequency, decimals);
+				returnValue.note = note;
+			}
 
-	// const frequencyData = new Uint8Array(analyser.frequencyBinCount);
-
-
-	const reader1 = new FileReader();
-	reader1.onload = function (ev) {
-		// Decode audio
-		context.decodeAudioData(ev.target.result).then((buffer) => {
-			const offlineCtx = new OfflineAudioContext(2, buffer.length, 44100);
-			const source = offlineCtx.createBufferSource();
-
-			let samplesCount = 0;
-			const audioDataArray = [];
-			// source.buffer = buffer;
-			// source.connect(offlineCtx.destination);
-			// source.start();
-
-			const analyser = offlineCtx.createAnalyser();
-			analyser.fftSize = 2048;
-			analyser.smoothingTimeConstant = 0.25;
-
-
-			const processor = offlineCtx.createScriptProcessor(2048, 1, 1);
-
-
-			source.buffer = buffer;
-
-			source.connect(analyser);
-			analyser.connect(processor);
-			processor.connect(offlineCtx.destination);
-			// const sondSource = context.createBufferSource();
-
-			const frequencyData = new Float32Array(analyser.frequencyBinCount);
-			// const frequencyData = new Uint8Array(analyser.frequencyBinCount);
-
-
-			processor.onaudioprocess = (e) => {
-				// console.log('processing', e, e.playbackTime);
-				const t = e.playbackTime;
-
-
-				// analyser.getByteFrequencyData(frequencyData);
-				// analyser.getByteFrequencyData(frequencyData);
-				analyser.getFloatFrequencyData(frequencyData);
-
-				// analyser.getFloatFrequencyData(frequencies);
-
-				const frequency = calculateFrequency(frequencyData);
-				const note = calculateNote(frequency);
-
-				if (Math.abs((t - Math.round(t))) < 0.05) {
-					// console.table(Math.round(e.playbackTime), frequency, note);
-
+			if (returnNote && returnCents) {
+				if (lastFrequency) {
+					const cents = calculateCents(frequency, lastFrequency);
+					returnValue.cents = toDecimals(cents);
 				}
+				lastFrequency = frequency;
+			}
 
-				const sec = 0.1; // one entry per second - .5 is half a second
-				const totalStamps = audioDataArray.length;
-				const timestamp = (Math.round(t / sec) * sec).toFixed(1);
-				// const timestamp = (Math.round(t / sec) * sec).toFixed(1);
-
-				// const timestamp = Math.round((t.toFixed(1) / sec) * 10) / 10;
-				console.log(timestamp / sec, totalStamps);
-
-
-				// console.log(timestamp, timestamp % sec === 0, (timestamp % sec).toFixed(1), totalStamps);
-
-
-				if ((timestamp / sec) > totalStamps) {
-					const data = {
-						timestamp,
-						frequency,
-						note,
-					};
-					audioDataArray.push(data);
-				}
-
-
-				samplesCount++;
-			};
-
-			// Start the process
-			source.start(0);
-
-			// Start the render
-			offlineCtx.startRendering().then((renderedBuffer) => {
-				console.log('Rendering completed successfully', audioDataArray);
-				// const song = context.createBufferSource();
-				// song.buffer = renderedBuffer;
-				// song.connect(context.destination);
-				// song.start();
-
-
-				// const frequencyBins = new Uint8Array(analyser.frequencyBinCount);
-
-				// console.log(11, frequencyBins, frequencyData);
-			 }).catch((err) => {
-				  console.log(`Rendering failed: ${err}`);
-				  // Note: The promise should reject when startRendering is called a second time on an OfflineAudioContext
-			 });
-
-			// Create Compressor Node
-		}, false);
-	};
-	reader1.readAsArrayBuffer(audioFile);
-
-
-	// const fft = new FFT(2048, 44100);
-	// console.log(fft);
-
-	// fft.forward(audio);
-	// const spectrum = fft.spectrum;
-
-
-	function renderFrame() {
-		// requestAnimationFrame(renderFrame);
-
-		// analyser.getByteFrequencyData(frequencyData);
-		// analyser.getFloatFrequencyData(frequencyData);
-
-		// console.log(frequencyData);
-
-
-		// return frequencyData;
+			audioDataArray.push(returnValue);
+		}
 	}
-	return renderFrame();
 }
 
-// var audio = new Audio();
-// audio.src = 'testAudio.mp3';
-// audio.controls = true;
-// audio.autoplay = true;
-// document.body.appendChild(audio);
+function getAudioData(arrayBuffer) {
+	const { callback, timeAveraging } = options;
 
-// var context = new AudioContext();
-// var analyser = context.createAnalyser();
+	// Decode audio
+	audioContext.decodeAudioData(arrayBuffer.target.result).then((decodedBuffer) => {
+		offlineCtx = new OfflineAudioContext(2, decodedBuffer.length, sampleRate);
+		bufferSource = offlineCtx.createBufferSource();
+		analyser = offlineCtx.createAnalyser();
+		analyser.fftSize = FFTSize;
+		analyser.smoothingTimeConstant = timeAveraging;
+		processor = offlineCtx.createScriptProcessor(FFTSize, 1, 1);
 
-//  var source = context.createMediaElementSource(audio);
-// source.connect(analyser);
-// analyser.connect(context.destination);
-// var frequencyData = new Uint8Array(analyser.frequencyBinCount);
-// function renderFrame() {
-//    requestAnimationFrame(renderFrame);
+		bufferSource.buffer = decodedBuffer;
+		bufferSource.connect(analyser);
+		analyser.connect(processor);
+		processor.connect(offlineCtx.destination);
 
-//    analyser.getByteFrequencyData(frequencyData);
-// }
-// renderFrame();
+		processor.onaudioprocess = processAudio;
+
+		// Start the process
+		bufferSource.start(0);
+
+		// Start the render
+		offlineCtx.startRendering().then((renderedBuffer) => {
+			callback(audioDataArray);
+		}).catch((err) => {
+			logError(`Rendering failed: ${err}`);
+
+			// onError()
+		});
+	}, false);
+}
+
+function fileAnalyse(args = {}) {
+	audioContext = detectAudioContext();
+
+	if (!args.callback) throwError('A callback needs to be passed to receive the return value');
+	if (!audioContext) throwError('Your browser does not support Audio Context');
+
+	options = { ...options, ...args };
+	const { audioFile } = options;
+
+	if (!audioFile) throwError('No audiofile provided');
+
+	const fileReaderBuffer = new FileReader();
+	fileReaderBuffer.onload = arrayBuffer => getAudioData(arrayBuffer);
+	fileReaderBuffer.readAsArrayBuffer(audioFile);
+}
 
 export { fileAnalyse };
