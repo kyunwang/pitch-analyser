@@ -1,4 +1,4 @@
-import { detectAudioContext, detectGetUserMedia } from './detector';
+import { detectAudioContext, detectGetUserMedia } from '../detector';
 
 import {
 	calculateFrequency,
@@ -7,7 +7,7 @@ import {
 	toDecimals,
 	throwError,
 	logError,
-} from './helpers';
+} from '../helpers';
 
 let getUserMedia;
 

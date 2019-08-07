@@ -1,6 +1,7 @@
-import { MicAnalyse } from './micAnalyse';
+import { MicAnalyse } from './analysers/MicAnalyse';
+import { fileAnalyse } from './analysers/fileAnalyse';
 
-export { MicAnalyse };
+export { MicAnalyse, fileAnalyse };
 
 // Top prevent breaking change - might remove in the future
 export default MicAnalyse;
