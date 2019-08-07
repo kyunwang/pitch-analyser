@@ -64,7 +64,7 @@ class PitchAnalyser {
 		// A callback needs to be passed during the development stage
 		if (!this.args.callback) throwError('A callback needs to be passed');
 
-		// Check whether the browser does support the feature. audioContext = false or window.AudioContext
+		// Does the browser support the feature? audioContext = false || window.AudioContext
 		if (!this.audioContext) {
 			logError('Your browser does not support Audio Context');
 		}
@@ -89,7 +89,9 @@ class PitchAnalyser {
 		const frequency = calculateFrequency(frequencies);
 
 		if (frequency) {
-			const { returnCents, returnNote, decimals, callback } = options;
+			const {
+				returnCents, returnNote, decimals, callback,
+			} = options;
 
 			const returnValue = {
 				frequency: toDecimals(frequency, decimals),
@@ -146,4 +148,4 @@ class PitchAnalyser {
 	}
 }
 
-module.exports = PitchAnalyser;
+export default PitchAnalyser;
