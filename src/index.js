@@ -89,7 +89,9 @@ class PitchAnalyser {
 		const frequency = calculateFrequency(frequencies);
 
 		if (frequency) {
-			const { returnCents, returnNote, decimals, callback } = options;
+			const {
+				returnCents, returnNote, decimals, callback,
+			} = options;
 
 			const returnValue = {
 				frequency: toDecimals(frequency, decimals),
@@ -146,4 +148,4 @@ class PitchAnalyser {
 	}
 }
 
-module.exports = PitchAnalyser;
+export default PitchAnalyser;
