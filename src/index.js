@@ -27,7 +27,6 @@ let options = {
 	returnNote: true,
 	returnCents: false,
 	decimals: 2,
-	// afterCloseCallback() {},
 };
 
 class PitchAnalyser {
@@ -36,66 +35,49 @@ class PitchAnalyser {
 		this.lastFrequency = null;
 		this.audioContext = null;
 
-		// Bindings
-		// this.initialize = this.initialize.bind(this);
-		this.analysePitch = this.analysePitch.bind(this); // TODO: Remove - breaking
-		// this.streamReceived = this.streamReceived.bind(this); // TODO: Remove from public
-		this.initiateStream = this.initiateStream.bind(this); // TODO: Remove from public
+		// Bindings - should be private
+		this.analysePitch = this.analysePitch.bind(this); // TODO: Remove from public?
+		this.initiateStream = this.initiateStream.bind(this); // TODO: Remove from public?
+	}
 
-		// Call initilize
-		this.initialize();
+	initAnalyser(callback) {
+		this.initialize().then(() => void callback && callback());
 	}
 
 	startAnalyser(callback) {
-		console.log(this.audioContext.state);
+		if (callback) {
+			callback();
+		}
+
 		this.analysePitch();
 	}
 
 	resumeAnalyser(callback) {
-		console.log('Resuming', this.audioContext.state, audioAnalyser);
 		if (this.audioContext.state === 'suspended') {
-			this.audioContext.resume().then(() => callback && callback());
+			this.audioContext.resume().then(() => {
+				if (callback) {
+					callback();
+				}
+
+				this.startAnalyser();
+			});
 		}
 	}
 
 	pauseAnalyser(callback) {
-		console.log('Pausing', this.audioContext.state);
-
 		if (this.audioContext.state === 'running') {
-			this.audioContext.suspend().then(() => callback && callback());
+			this.audioContext.suspend().then(() => void callback && callback());
 		}
 	}
 
 	stopAnalyser(callback) {
-		console.log('Stopping');
-		this.audioContext.close().then(() => callback && callback());
-	}
+		this.audioContext.close().then(() => {
+			if (callback) {
+				callback();
+			}
 
-	initialize() {
-		// Feature detect and pass AudioContext to audioContext
-		this.audioContext = detectAudioContext();
-		getUserMedia = detectGetUserMedia();
-
-		if (!(this instanceof PitchAnalyser)) {
-			throwError("constructor needs to be called with the 'new' keyword");
-		}
-
-		// A callback needs to be passed during the development stage
-		if (!this.args.callback) throwError('A callback needs to be passed');
-
-		// Check whether the browser does support the feature. audioContext = false or window.AudioContext
-		if (!this.audioContext) {
-			logError('Your browser does not support Audio Context');
-		}
-
-		// getUserMedia = window.getUserMedia(went through feature detects) or false
-		if (!getUserMedia) logError('Your brower does not support getUserMedia');
-
-		// Pass user given arguments to the options
-		options = { ...options, ...this.args };
-
-		// Start media stream
-		getUserMedia({ audio: true }).then(this.initiateStream).catch(throwError);
+			this.audioContext = null;
+		});
 	}
 
 	// Get the frequencies and return values based on options
@@ -129,9 +111,38 @@ class PitchAnalyser {
 		}
 
 		// Tells the browser we wish to perform an animation. Call callback before re-paint
-		if (this.audioContext.state === 'running') {
+		if (this.audioContext && this.audioContext.state === 'running') {
 			window.requestAnimationFrame(this.analysePitch);
 		}
+	}
+
+	initialize() {
+		// Feature detect and pass AudioContext to audioContext
+		this.audioContext = detectAudioContext();
+		getUserMedia = detectGetUserMedia();
+
+		if (!(this instanceof PitchAnalyser)) {
+			throwError("constructor needs to be called with the 'new' keyword");
+		}
+
+		// A callback needs to be passed during the development stage
+		if (!this.args.callback) throwError('A callback needs to be passed');
+
+		// Check whether the browser does support the feature. audioContext = false or window.AudioContext
+		if (!this.audioContext) {
+			logError('Your browser does not support Audio Context');
+		}
+
+		// getUserMedia = window.getUserMedia(went through feature detects) or false
+		if (!getUserMedia) logError('Your brower does not support getUserMedia');
+
+		// Pass user given arguments to the options
+		options = { ...options, ...this.args };
+
+		// Start media stream
+		return getUserMedia({ audio: true })
+			.then(this.initiateStream)
+			.catch(throwError);
 	}
 
 	initiateStream(stream) {
