@@ -18,7 +18,6 @@ let audioStream;
 
 let frequencies;
 let amplitude;
-let volume;
 
 // Default of options
 let options = {
@@ -39,17 +38,37 @@ class PitchAnalyser {
 
 		// Bindings
 		// this.initialize = this.initialize.bind(this);
-		this.analysePitch = this.analysePitch.bind(this);
-		this.streamReceived = this.streamReceived.bind(this);
+		this.analysePitch = this.analysePitch.bind(this); // TODO: Remove - breaking
+		// this.streamReceived = this.streamReceived.bind(this); // TODO: Remove from public
+		this.initiateStream = this.initiateStream.bind(this); // TODO: Remove from public
 
 		// Call initilize
 		this.initialize();
 	}
 
-	closeContext(callback) {
-		if (callback) {
-			this.audioContext.close().then(() => callback());
+	startAnalyser(callback) {
+		console.log(this.audioContext.state);
+		this.analysePitch();
+	}
+
+	resumeAnalyser(callback) {
+		console.log('Resuming', this.audioContext.state, audioAnalyser);
+		if (this.audioContext.state === 'suspended') {
+			this.audioContext.resume().then(() => callback && callback());
 		}
+	}
+
+	pauseAnalyser(callback) {
+		console.log('Pausing', this.audioContext.state);
+
+		if (this.audioContext.state === 'running') {
+			this.audioContext.suspend().then(() => callback && callback());
+		}
+	}
+
+	stopAnalyser(callback) {
+		console.log('Stopping');
+		this.audioContext.close().then(() => callback && callback());
 	}
 
 	initialize() {
@@ -76,22 +95,17 @@ class PitchAnalyser {
 		options = { ...options, ...this.args };
 
 		// Start media stream
-		getUserMedia({ audio: true })
-			.then(this.streamReceived)
-			.catch(throwError);
+		getUserMedia({ audio: true }).then(this.initiateStream).catch(throwError);
 	}
 
 	// Get the frequencies and return values based on options
 	analysePitch() {
 		audioAnalyser.getFloatFrequencyData(frequencies);
-		audioAnalyser.getByteTimeDomainData(amplitude);
 
 		const frequency = calculateFrequency(frequencies);
 
 		if (frequency) {
-			const {
-				returnCents, returnNote, decimals, callback,
-			} = options;
+			const { returnCents, returnNote, decimals, callback } = options;
 
 			const returnValue = {
 				frequency: toDecimals(frequency, decimals),
@@ -114,11 +128,13 @@ class PitchAnalyser {
 			callback(returnValue);
 		}
 
-		// Tells the browser we wish to perform a animation. Call callback before repaint
-		window.requestAnimationFrame(this.analysePitch);
+		// Tells the browser we wish to perform an animation. Call callback before re-paint
+		if (this.audioContext.state === 'running') {
+			window.requestAnimationFrame(this.analysePitch);
+		}
 	}
 
-	streamReceived(stream) {
+	initiateStream(stream) {
 		// Set the stream to audioStream
 		audioStream = stream;
 
@@ -128,23 +144,13 @@ class PitchAnalyser {
 		// Create frequencies arrayholder
 		frequencies = new Float32Array(audioAnalyser.frequencyBinCount);
 
-		//
 		amplitude = new Uint8Array(audioAnalyser.frequencyBinCount);
-
-		// Create amplifier
-		volume = this.audioContext.createGain();
 
 		// Assign a stream source as main source
 		audioSource = this.audioContext.createMediaStreamSource(audioStream);
 
-		// Connect the audio to the amplifier
-		audioSource.connect(volume);
-
 		// Connect the audio to our analyser
 		audioSource.connect(audioAnalyser);
-
-		// Start note detection
-		this.analysePitch();
 	}
 }
 
