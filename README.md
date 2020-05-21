@@ -5,7 +5,7 @@ This package makes use of the `Web Audio API`
 
 Here is an example project called note detector using this package here. (**[Repo](https://github.com/kyunwang/note-detector)** / **[Demo](https://kyunwang.github.io/note-detector/)**)
 
-**Note:** To chrome users/devs. From Chrome 66+ autoplay will work anymore. You will need to make use of the `resume()` method to start/resume the analyser. Check the _Methods_ section of the docs here.
+**CURRENT ISSUE:** Known issue - Chrome does not `resume` the analyser after pausing.
 
 **WARNING:** Breaking changes possible - This will be done as MINOR updates.
 
