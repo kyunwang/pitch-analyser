@@ -41,7 +41,7 @@ class PitchAnalyser {
 	}
 
 	initAnalyser(callback) {
-		this.initialize().then(() => void callback && callback());
+		return this.initialize().then(() => callback && callback());
 	}
 
 	startAnalyser(callback) {
@@ -66,7 +66,7 @@ class PitchAnalyser {
 
 	pauseAnalyser(callback) {
 		if (this.audioContext.state === 'running') {
-			this.audioContext.suspend().then(() => void callback && callback());
+			this.audioContext.suspend().then(() => callback && callback());
 		}
 	}
 
