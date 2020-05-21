@@ -10,21 +10,21 @@ const calculateFrequency = (frequencies, options) => {
 	let rate = 22050 / 1024; // defaults in audioContext.
 
 	if (options) {
-	  if (options.rate) {
-		 rate = options.rate;
-	  }
+		if (options.rate) {
+			rate = options.rate;
+		}
 	}
 
 	let maxI;
 	let max = frequencies[0];
 
 	for (let i = 0; frequencies.length > i; i++) {
-	  const oldmax = parseFloat(max);
-	  const newmax = Math.max(max, frequencies[i]);
-	  if (oldmax != newmax) {
-		 max = newmax;
-		 maxI = i;
-	  }
+		const oldmax = parseFloat(max);
+		const newmax = Math.max(max, frequencies[i]);
+		if (oldmax != newmax) {
+			max = newmax;
+			maxI = i;
+		}
 	}
 	return maxI * rate;
 };
@@ -69,7 +69,7 @@ const logError = (err) => {
 	console.error(err);
 };
 
-module.exports = {
+export {
 	calculateFrequency,
 	calculateSemiTone,
 	calculateCents,

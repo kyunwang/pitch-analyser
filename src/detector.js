@@ -25,7 +25,7 @@ const detectGetUserMedia = () => {
 	return false;
 };
 
-module.exports = {
+export {
 	detectAudioContext,
 	detectGetUserMedia,
 };

@@ -55,3 +55,6 @@ typings/
 .vscode/
 
 dist
+test
+
+NOTES.md

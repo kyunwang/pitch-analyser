@@ -1,16 +1,21 @@
 # Pitch Analyser
-
 A super simple package for reading audio input from a microphone. E.g. pitch frequency, music notes and the cents.
 
 This package makes use of the `Web Audio API`
 
-<p align="center">
-	<img src="https://github.com/kyunwang/Repo-Images/blob/master/pitch-analyser/note-detector%20example.png" alt="Demo image" width="300" height="520"/>
-</p>
-
 Here is an example project called note detector using this package here. (**[Repo](https://github.com/kyunwang/note-detector)** / **[Demo](https://kyunwang.github.io/note-detector/)**)
 
-**Note:** To chrome users/devs. From Chrome 66+ autoplay will work anymore. You will need to make use of the `resume()` method to start/resume the analyser. Check the _Methods_ section of the docs here.
+**CURRENT ISSUE:** Known issue - Chrome does not `resume` the analyser after pausing.
+
+**WARNING:** Breaking changes possible - This will be done as MINOR updates.
+
+Not in active development, but at times I can make a breaking change to optimise usage. So keep that in mind, if you are one of the lovely people trying this package out.
+
+Will remove the warning if this will not be the case anymore. Or help me out with this I guess? 🤷🏻‍♂️
+
+<p align="center">
+	<img src="https://raw.githubusercontent.com/kyunwang/Repo-Images/master/pitch-analyser/note-detector%20example.png" alt="Demo image" width="200" height="340"/>
+</p>
 
 # Table of Content
 
