@@ -57,7 +57,7 @@ const analyser = new pitchAnalyser({
 
 ```
 componentWillUnmount() {
-	analyser.close();
+	analyser.stopAnalyser();
 }
 ```
 
